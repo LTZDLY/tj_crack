@@ -1,24 +1,36 @@
 // ==UserScript==
-// @name        New script
+// @name        TJ_crack
 // @namespace   Violentmonkey Scripts
 // @match       *://ids.tongji.edu.cn:8443/nidp/app/login*
+// @connect     api.shinoai.com
 // @grant       GM_xmlhttpRequest
 // @run-at      document-end
-// @version     0.1.0
+// @version     0.1.1
 // @author      Shinoai Kyoka
+// @license     MIT
 // @description 2023/8/31 16:16:43
 // ==/UserScript==
+
+var a = document.getElementById("reg");
+var hook = a.onclick;
+function globalErrorHandle(msg, url, l, c, error) {
+  console.error("global js error: ", msg);
+  if (msg.message === "Uncaught timeout") {
+    hook();
+    a.disabled = false;
+    a.style.cursor = null;
+  }
+}
+window.onerror = globalErrorHandle;
 
 (async function () {
   "use strict";
   console.log("use strict");
-  var a = document.getElementById("reg");
-  //   var hook = a.onclick;
   a.onclick = () => {
     a.disabled = true;
     a.style.cursor = "not-allowed";
     // 首先请求验证码图片，然后向后端发送请求并接收从后端返回的验证码，将前端验证码元素修改后调用元素的提交函数即可
-    WantGetFinallyText();
+    CrackCode();
   };
 })();
 
@@ -51,7 +63,6 @@ const getCode = () =>
         resolve(obj.repData);
         // sendCode(obj.repData);
       },
-      onerror: function (res) {},
     });
   });
 
@@ -63,6 +74,7 @@ const sendCode = (d) =>
       url: "https://api.shinoai.com/something/tj_crack",
       headers: { "Content-Type": "application/json" },
       data: JSON.stringify(d),
+      timeout: 2000,
       onload: function (res) {
         if (res.responseText != "null") {
           var obj = JSON.parse(res.responseText);
@@ -70,7 +82,10 @@ const sendCode = (d) =>
         }
         resolve();
       },
-      onerror: function (res) {},
+      ontimeout: function (res) {
+        console.log("timeout, use default method");
+        throw "timeout";
+      },
     });
   });
 
@@ -90,7 +105,6 @@ const checkCode = (code, token) =>
         var obj = JSON.parse(res.responseText);
         resolve(obj);
       },
-      onerror: function (res) {},
     });
   });
 
@@ -120,8 +134,3 @@ const subbmit = (code) => {
   c.value = code;
   loginSubmit();
 };
-
-function WantGetFinallyText() {
-  let data = CrackCode();
-  //   console.log("WantGetFinallyText", data);
-}

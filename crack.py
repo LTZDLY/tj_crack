@@ -9,7 +9,7 @@ from PIL import Image as Img, ImageDraw, ImageFont
 import pathlib
 
 
-MYFONT = r"./sources/fonts/STZHONGS.ttf"
+MYFONT = r"./sources/fonts/STZHONGS.TTF"
 IMGPATH = r"./sources/imgs/"
 
 
